@@ -1,0 +1,22 @@
+[package]
+name = "moonshine-check"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Validation and recovery solution for Bevy"
+categories = ["game-development"]
+keywords = ["bevy", "ecs", "type-safety"]
+readme = "README.md"
+homepage = "https://github.com/Zeenobit/moonshine_check"
+repository = "https://github.com/Zeenobit/moonshine_check"
+
+[dependencies]
+bevy_app = "0.14.*"
+bevy_ecs = "0.14.*"
+bevy_utils = "0.14.*"
+bevy_hierarchy = "0.14.*"
+moonshine-kind = { version = "0.2.0", path = "../core/crates/kind" }
+moonshine-save = { version = "0.3.9", path = "../core/crates/save" }
+
+[dev-dependencies]
+bevy = "0.14.*"
