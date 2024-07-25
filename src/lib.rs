@@ -6,7 +6,11 @@ use moonshine_kind::prelude::*;
 use moonshine_save::load::LoadSystem;
 
 pub mod prelude {
-    pub use super::{invalid, panic, purge, repair, Check, Valid};
+    pub use super::{invalid, panic, purge};
+    pub use super::{repair, repair_remove};
+    pub use super::{repair_insert, repair_insert_default};
+    pub use super::{repair_replace, repair_replace_default, repair_replace_with};
+    pub use super::{Check, Valid};
 }
 
 /// An extension trait used to add checks to an [`App`].
