@@ -313,6 +313,55 @@ pub fn repair(f: impl Fix) -> Policy {
     Policy::Repair(Fixer::new(f))
 }
 
+pub fn repair_insert<T: Component + Clone>(component: T) -> impl Fix {
+    move |entity: EntityRef, commands: &mut Commands| {
+        commands.entity(entity.id()).insert(component.clone());
+    }
+}
+
+pub fn repair_insert_default<T: Component + Default>() -> impl Fix {
+    move |entity: EntityRef, commands: &mut Commands| {
+        commands.entity(entity.id()).insert(T::default());
+    }
+}
+
+pub fn repair_replace<T: Component, U: Component + Clone>(component: U) -> impl Fix {
+    move |entity: EntityRef, commands: &mut Commands| {
+        commands
+            .entity(entity.id())
+            .remove::<T>()
+            .insert(component.clone());
+    }
+}
+
+pub fn repair_replace_default<T: Component, U: Component + Default>() -> impl Fix {
+    move |entity: EntityRef, commands: &mut Commands| {
+        commands
+            .entity(entity.id())
+            .remove::<T>()
+            .insert(U::default());
+    }
+}
+
+pub fn repair_replace_with<T: Component, U: Component, F>(f: F) -> impl Fix
+where
+    F: 'static + Fn(&T) -> U + Send + Sync,
+{
+    move |entity: EntityRef, commands: &mut Commands| {
+        let component = entity.get::<T>().unwrap();
+        commands
+            .entity(entity.id())
+            .remove::<T>()
+            .insert(f(component));
+    }
+}
+
+pub fn repair_remove<T: Component>() -> impl Fix {
+    move |entity: EntityRef, commands: &mut Commands| {
+        commands.entity(entity.id()).remove::<T>();
+    }
+}
+
 /// A [`QueryFilter`] which indicates that an [`Entity`] has been checked and is valid.
 ///
 /// See [`invalid`] for a usage example.
