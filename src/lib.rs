@@ -6,9 +6,10 @@ use moonshine_kind::prelude::*;
 use moonshine_save::load::LoadSystem;
 
 pub mod prelude {
-    pub use super::{fix_insert, fix_insert_default, fix_remove};
-    pub use super::{fix_replace, fix_replace_default, fix_replace_with};
-    pub use super::{invalid, panic, purge, repair};
+    pub use super::{invalid, panic, purge};
+    pub use super::{repair, repair_remove};
+    pub use super::{repair_insert, repair_insert_default};
+    pub use super::{repair_replace, repair_replace_default, repair_replace_with};
     pub use super::{Check, Valid};
 }
 
@@ -316,53 +317,53 @@ pub fn repair(f: impl Fix) -> Policy {
     Policy::Repair(Fixer::new(f))
 }
 
-pub fn fix_insert<T: Component + Clone>(component: T) -> impl Fix {
-    move |entity: EntityRef, commands: &mut Commands| {
+pub fn repair_insert<T: Component + Clone>(component: T) -> Policy {
+    repair(move |entity: EntityRef, commands: &mut Commands| {
         commands.entity(entity.id()).insert(component.clone());
-    }
+    })
 }
 
-pub fn fix_insert_default<T: Component + Default>() -> impl Fix {
-    move |entity: EntityRef, commands: &mut Commands| {
+pub fn repair_insert_default<T: Component + Default>() -> Policy {
+    repair(move |entity: EntityRef, commands: &mut Commands| {
         commands.entity(entity.id()).insert(T::default());
-    }
+    })
 }
 
-pub fn fix_replace<T: Component, U: Component + Clone>(component: U) -> impl Fix {
-    move |entity: EntityRef, commands: &mut Commands| {
+pub fn repair_replace<T: Component, U: Component + Clone>(component: U) -> Policy {
+    repair(move |entity: EntityRef, commands: &mut Commands| {
         commands
             .entity(entity.id())
             .remove::<T>()
             .insert(component.clone());
-    }
+    })
 }
 
-pub fn fix_replace_default<T: Component, U: Component + Default>() -> impl Fix {
-    move |entity: EntityRef, commands: &mut Commands| {
+pub fn repair_replace_default<T: Component, U: Component + Default>() -> Policy {
+    repair(move |entity: EntityRef, commands: &mut Commands| {
         commands
             .entity(entity.id())
             .remove::<T>()
             .insert(U::default());
-    }
+    })
 }
 
-pub fn fix_replace_with<T: Component, U: Component, F>(f: F) -> impl Fix
+pub fn repair_replace_with<T: Component, U: Component, F>(f: F) -> Policy
 where
     F: 'static + Fn(&T) -> U + Send + Sync,
 {
-    move |entity: EntityRef, commands: &mut Commands| {
+    repair(move |entity: EntityRef, commands: &mut Commands| {
         let component = entity.get::<T>().unwrap();
         commands
             .entity(entity.id())
             .remove::<T>()
             .insert(f(component));
-    }
+    })
 }
 
-pub fn fix_remove<T: Component>() -> impl Fix {
-    move |entity: EntityRef, commands: &mut Commands| {
+pub fn repair_remove<T: Component>() -> Policy {
+    repair(move |entity: EntityRef, commands: &mut Commands| {
         commands.entity(entity.id()).remove::<T>();
-    }
+    })
 }
 
 /// A [`QueryFilter`] which indicates that an [`Entity`] has been checked and is valid.
