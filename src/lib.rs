@@ -1,5 +1,9 @@
 use bevy_app::prelude::*;
-use bevy_ecs::{prelude::*, query::QueryFilter, system::EntityCommands};
+use bevy_ecs::{
+    prelude::*,
+    query::{QueryEntityError, QueryFilter},
+    system::EntityCommands,
+};
 use bevy_hierarchy::DespawnRecursiveExt;
 use bevy_utils::tracing::{debug, error, warn};
 use moonshine_kind::prelude::*;
@@ -57,17 +61,25 @@ impl Check for App {
                    world: &World,
                    mut commands: Commands| {
                 for instance in query.iter() {
-                    if check.get(instance.entity()).is_err() {
-                        if let Some(mut entity) = commands.get_entity(instance.entity()) {
-                            entity.insert(Checked);
-                            debug!("{instance:?} is valid.");
+                    match check.get(instance.entity()) {
+                        // NOTE: Query Mismatch implies OK!
+                        Err(QueryEntityError::QueryDoesNotMatch(_)) => {
+                            if let Some(mut entity) = commands.get_entity(instance.entity()) {
+                                entity.try_insert(Checked);
+                                debug!("{instance:?} is valid.");
+                            }
+                            continue;
                         }
-                        continue;
-                    }
+                        Err(QueryEntityError::NoSuchEntity(_)) => {
+                            continue;
+                        }
+                        _ => {}
+                    };
+
                     match &policy {
                         Policy::Invalid => {
                             if let Some(mut entity) = commands.get_entity(instance.entity()) {
-                                entity.insert((Checked, Invalid));
+                                entity.try_insert((Checked, Invalid));
                                 error!("{instance:?} is invalid: {}", filter_name());
                             }
                         }
@@ -81,11 +93,14 @@ impl Check for App {
                             panic!("{instance:?} is strictly invalid: {}", filter_name());
                         }
                         Policy::Repair(fixer) => {
-                            if commands.get_entity(instance.entity()).is_some() {
+                            if let Some(mut entity) = commands.get_entity(instance.entity()) {
+                                // Inset `Checked` before fixing to let the fixer remove it if needed
+                                entity.try_insert(Checked);
+                                error!("{instance:?} is invalid: {}", filter_name());
+
                                 let entity = world.entity(instance.entity());
-                                commands.entity(instance.entity()).insert(Checked);
                                 fixer.fix(entity, &mut commands);
-                                warn!("{instance:?} was repaired: {}", filter_name());
+                                warn!("{instance:?} was repaired.");
                             }
                         }
                     }
