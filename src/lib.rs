@@ -53,7 +53,7 @@ pub trait Check {
 
 impl Check for App {
     fn check<T: Kind, F: CheckFilter>(&mut self, policy: Policy) -> &mut Self {
-        let filter_name = || bevy_utils::get_short_name(std::any::type_name::<F>());
+        let filter_name = || moonshine_util::get_short_name(std::any::type_name::<F>());
         self.add_systems(
             PreUpdate,
             (move |query: Query<Instance<T>, Unchecked>,
@@ -63,7 +63,7 @@ impl Check for App {
                 for instance in query.iter() {
                     match check.get(instance.entity()) {
                         // NOTE: Query Mismatch implies OK!
-                        Err(QueryEntityError::QueryDoesNotMatch(_)) => {
+                        Err(QueryEntityError::QueryDoesNotMatch(..)) => {
                             if let Some(mut entity) = commands.get_entity(instance.entity()) {
                                 entity.try_insert(Checked);
                                 debug!("{instance:?} is valid.");
@@ -459,7 +459,7 @@ mod tests {
         let entity = app.world_mut().spawn(Foo).id();
         app.update();
 
-        assert!(app.world().get_entity(entity).is_none());
+        assert!(app.world().get_entity(entity).is_err());
     }
 
     #[test]

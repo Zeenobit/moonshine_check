@@ -1,6 +1,6 @@
 [package]
 name = "moonshine-check"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "MIT"
 description = "Validation and recovery solution for Bevy"
@@ -11,12 +11,13 @@ homepage = "https://github.com/Zeenobit/moonshine_check"
 repository = "https://github.com/Zeenobit/moonshine_check"
 
 [dependencies]
-bevy_app = "0.14.*"
-bevy_ecs = "0.14.*"
-bevy_utils = "0.14.*"
-bevy_hierarchy = "0.14.*"
-moonshine-kind = { version = "0.2.0", path = "../kind" }
-moonshine-save = { version = "0.3.9", path = "../save" }
+bevy_app = "0.15.*"
+bevy_ecs = "0.15.*"
+bevy_utils = "0.15.*"
+bevy_hierarchy = "0.15.*"
+moonshine-kind = { version = "0.2.1", path = "../kind" }
+moonshine-save = { version = "0.3.10", path = "../save" }
+moonshine-util = { version = "0.2.6", path = "../util" }
 
 [dev-dependencies]
-bevy = "0.14.*"
+bevy = "0.15.*"
