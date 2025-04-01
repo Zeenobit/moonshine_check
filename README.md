@@ -8,6 +8,34 @@
 
 Validation and recovery solution for [Bevy](https://github.com/bevyengine/bevy).
 
+## ⚠️ Deprecated
+
+This crate is deprecated in favor of [component hooks](https://docs.rs/bevy/latest/bevy/ecs/component/trait.Component.html#adding-components-hooks) and [required components](https://docs.rs/bevy/latest/bevy/ecs/component/trait.Component.html#required-components).
+
+Because of component requirements, there should never be a need to manually check for component dependencies or to check for [`Kind`] correctness.
+
+```rust
+#[derive(Component)]
+#[require(Name)] // Person will always have `Name`. Period.
+struct Person;
+```
+
+To validate entities on component addition, you may you use the `on_add` hook and perform any check or repair you want:
+
+```rust
+use bevy::ecs::component::ComponentId;
+use bevy::world::DeferredWorld;
+
+#[derive(Component)]
+#[require(Name)]
+#[component(on_add = on_person_add)]
+struct Person;
+
+fn on_person_add(mut world: DeferredWorld, entity: Entity, _: ComponentId) {
+    // ... Validate/Repair/Replace/Upgrade components ...
+}
+```
+
 ## Overview
 
 A common source of bugs in Bevy applications is invalid assumptions about the state of the world. Typically, this results in queries that "miss" their target entities due to query mismatch:

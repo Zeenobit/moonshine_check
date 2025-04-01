@@ -1,3 +1,8 @@
+#![deprecated(
+    since = "0.1.1",
+    note = "This crate is deprecated. Use component hooks instead."
+)]
+
 use bevy_app::prelude::*;
 use bevy_ecs::{
     prelude::*,
