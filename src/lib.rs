@@ -9,8 +9,7 @@ use bevy_ecs::{
     query::{QueryEntityError, QueryFilter},
     system::EntityCommands,
 };
-use bevy_hierarchy::DespawnRecursiveExt;
-use bevy_utils::tracing::{debug, error, warn};
+use bevy_log::prelude::*;
 use moonshine_kind::prelude::*;
 use moonshine_save::load::LoadSystem;
 
@@ -69,13 +68,13 @@ impl Check for App {
                     match check.get(instance.entity()) {
                         // NOTE: Query Mismatch implies OK!
                         Err(QueryEntityError::QueryDoesNotMatch(..)) => {
-                            if let Some(mut entity) = commands.get_entity(instance.entity()) {
+                            if let Ok(mut entity) = commands.get_entity(instance.entity()) {
                                 entity.try_insert(Checked);
                                 debug!("{instance:?} is valid.");
                             }
                             continue;
                         }
-                        Err(QueryEntityError::NoSuchEntity(_)) => {
+                        Err(QueryEntityError::EntityDoesNotExist(_)) => {
                             continue;
                         }
                         _ => {}
@@ -83,14 +82,14 @@ impl Check for App {
 
                     match &policy {
                         Policy::Invalid => {
-                            if let Some(mut entity) = commands.get_entity(instance.entity()) {
+                            if let Ok(mut entity) = commands.get_entity(instance.entity()) {
                                 entity.try_insert((Checked, Invalid));
                                 error!("{instance:?} is invalid: {}", filter_name());
                             }
                         }
                         Policy::Purge => {
-                            if let Some(entity) = commands.get_entity(instance.entity()) {
-                                entity.despawn_recursive();
+                            if let Ok(mut entity) = commands.get_entity(instance.entity()) {
+                                entity.despawn();
                                 error!("{instance:?} is purged: {}", filter_name());
                             }
                         }
@@ -98,7 +97,7 @@ impl Check for App {
                             panic!("{instance:?} is strictly invalid: {}", filter_name());
                         }
                         Policy::Repair(fixer) => {
-                            if let Some(mut entity) = commands.get_entity(instance.entity()) {
+                            if let Ok(mut entity) = commands.get_entity(instance.entity()) {
                                 // Inset `Checked` before fixing to let the fixer remove it if needed
                                 entity.try_insert(Checked);
                                 error!("{instance:?} is invalid: {}", filter_name());

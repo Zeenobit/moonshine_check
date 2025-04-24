@@ -11,13 +11,12 @@ homepage = "https://github.com/Zeenobit/moonshine_check"
 repository = "https://github.com/Zeenobit/moonshine_check"
 
 [dependencies]
-bevy_app = "0.15.*"
-bevy_ecs = "0.15.*"
-bevy_utils = "0.15.*"
-bevy_hierarchy = "0.15.*"
+bevy_app = "0.16.*"
+bevy_ecs = "0.16.*"
+bevy_log = "0.16.*"
 moonshine-kind = { version = "0.2.1", path = "../kind" }
 moonshine-save = { version = "0.3.10", path = "../save" }
 moonshine-util = { version = "0.2.6", path = "../util" }
 
 [dev-dependencies]
-bevy = "0.15.*"
+bevy = "0.16.*"
